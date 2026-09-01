@@ -1,0 +1,136 @@
+# ==============================
+# Node
+# ==============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==============================
+# Expo
+# ==============================
+.expo/
+.expo-shared/
+dist/
+web-build/
+
+# ==============================
+# React Native
+# ==============================
+*.hprof
+
+# ==============================
+# Android generated files
+# ==============================
+android/.gradle/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/.cxx/
+
+# ==============================
+# Android generated APKs
+# ==============================
+*.apk
+*.aab
+
+# ==============================
+# iOS generated files
+# ==============================
+ios/Pods/
+ios/build/
+ios/DerivedData/
+
+# ==============================
+# Server generated files
+# ==============================
+server/node_modules/
+server/voice-recordings/
+server/voice_sos_uploads/
+
+# ==============================
+# Voice SOS generated files
+# ==============================
+VoiceSOSServer/node_modules/
+VoiceSOSServer/voice-recordings/
+VoiceSOSServer/voice_sos_uploads/
+
+# ==============================
+# Environment / secrets
+# ==============================
+.env
+.env.*
+!.env.example
+
+# ==============================
+# IDE
+# ==============================
+.vscode/
+.idea/
+*.iml
+
+# ==============================
+# OS
+# ==============================
+.DS_Store
+Thumbs.db
+
+# ==============================
+# Temporary files
+# ==============================
+*.swp
+*.swo
+*~
+*.tmp
+*.temp
+
+# ==============================
+# Large installers
+# ==============================
+*.exe
+*.msi
+
+# ==============================
+# Logs
+# ==============================
+*.log
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Android build files
+android/app/build/
+android/build/
+android/app/.cxx/
+android/.gradle/
+**/build/
+**/.cxx/
+
+# APK files
+*.apk
+*.aab
+
+# Android local/debug files
+android/app/debug.keystore
+**/debug.keystore
+
+# Large installers
+*.exe
+
+# Voice recordings
+server/voice-recordings/
+server/voice_sos_uploads/
+VoiceSOSServer/voice-recordings/
+VoiceSOSServer/voice_sos_uploads/
+
+# Temporary files
+*.swp
+*.tmp
+
+# Environment/secrets
+.env
+**/.env
+
+# Generated data
+server/data/emailHistory.json
+server/data/liveLocations.json
