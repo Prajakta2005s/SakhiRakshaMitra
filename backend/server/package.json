@@ -15,8 +15,8 @@
     "dotenv": "^17.4.2",
     "expo": "~57.0.13",
     "express": "^5.2.1",
-    "multer": "^2.2.0",
-    "nodemailer": "^9.0.6",
+    "multer": "^2.3.0",
+    "nodemailer": "^9.1.0",
     "react": "19.2.3",
     "react-native": "0.86.2",
     "twilio": "^6.1.0"
