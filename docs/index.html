@@ -1,1 +1,1596 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Sakhi RakshaMitra - Live Location</title>
+
+  <!-- =========================================================
+       LEAFLET CSS
+       ========================================================= -->
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <!-- =========================================================
+       PAGE STYLE
+       ========================================================= -->
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+    }
+
+    /* =========================================================
+       HEADER
+       ========================================================= */
+
+    .header {
+      background: #1976d2;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .header h2 {
+      margin: 0;
+      font-size: 21px;
+    }
+
+    .header p {
+      margin: 5px 0 0;
+      font-size: 13px;
+      opacity: 0.95;
+    }
+
+    /* =========================================================
+       STATUS CARD
+       ========================================================= */
+
+    .status-card {
+      background: white;
+      margin: 10px;
+      padding: 14px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .status-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .status-text {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    .destination-text {
+      font-size: 14px;
+      font-weight: bold;
+      color: #e65100;
+    }
+
+    .safe {
+      color: #2e7d32;
+    }
+
+    .warning {
+      color: #ef6c00;
+    }
+
+    .error {
+      color: #c62828;
+    }
+
+    /* =========================================================
+       INFORMATION ROW
+       ========================================================= */
+
+    .info-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .info-box {
+      flex: 1;
+      min-width: 120px;
+      background: #f5f5f5;
+      padding: 9px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .info-label {
+      font-size: 11px;
+      color: #777;
+    }
+
+    .info-value {
+      margin-top: 3px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* =========================================================
+       MAP
+       ========================================================= */
+
+    #map {
+      width: 100%;
+      height: calc(100vh - 205px);
+      min-height: 450px;
+    }
+
+    /* =========================================================
+       LEGEND
+       ========================================================= */
+
+    .legend {
+      background: white;
+      padding: 10px 12px;
+      border-radius: 9px;
+      box-shadow: 0 2px 7px rgba(0,0,0,0.25);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .legend-title {
+      font-weight: bold;
+      margin-bottom: 3px;
+    }
+
+    /* =========================================================
+       MOBILE
+       ========================================================= */
+
+    @media (max-width: 600px) {
+
+      .header h2 {
+        font-size: 18px;
+      }
+
+      .status-title {
+        font-size: 16px;
+      }
+
+      #map {
+        height: calc(100vh - 220px);
+      }
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <!-- =========================================================
+       HEADER
+       ========================================================= -->
+
+  <div class="header">
+
+    <h2>
+      🛡️ Sakhi RakshaMitra
+    </h2>
+
+    <p>
+      Live Journey Monitoring
+    </p>
+
+  </div>
+
+
+  <!-- =========================================================
+       STATUS
+       ========================================================= -->
+
+  <div class="status-card">
+
+    <div
+      id="statusTitle"
+      class="status-title"
+    >
+      Connecting...
+    </div>
+
+    <div
+      id="statusText"
+      class="status-text"
+    >
+      Loading live location...
+    </div>
+
+    <div
+      id="destinationText"
+      class="destination-text"
+    >
+    </div>
+
+
+    <!-- =======================================================
+         INFORMATION
+         ======================================================= -->
+
+    <div class="info-row">
+
+      <div class="info-box">
+
+        <div class="info-label">
+          Current Latitude
+        </div>
+
+        <div
+          id="latitudeValue"
+          class="info-value"
+        >
+          --
+        </div>
+
+      </div>
+
+
+      <div class="info-box">
+
+        <div class="info-label">
+          Current Longitude
+        </div>
+
+        <div
+          id="longitudeValue"
+          class="info-value"
+        >
+          --
+        </div>
+
+      </div>
+
+
+      <div class="info-box">
+
+        <div class="info-label">
+          Route Status
+        </div>
+
+        <div
+          id="routeValue"
+          class="info-value"
+        >
+          --
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       MAP
+       ========================================================= -->
+
+  <div id="map"></div>
+
+
+  <!-- =========================================================
+       LEAFLET JAVASCRIPT
+       ========================================================= -->
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  ></script>
+
+
+  <!-- =========================================================
+       MAIN JAVASCRIPT
+       ========================================================= -->
+
+  <script>
+
+    // ==========================================================
+    // YOUR CURRENT NGROK URL
+    // ==========================================================
+
+    const NGROK_BASE_URL =
+      "https://quake-proofs-president.ngrok-free.dev";
+
+
+    // ==========================================================
+    // GET LOCATION ID FROM EMAIL LINK
+    // ==========================================================
+
+    const urlParams =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const locationId =
+      urlParams.get(
+        "locationId"
+      );
+
+
+    // ==========================================================
+    // VALIDATE LOCATION ID
+    // ==========================================================
+
+    if (!locationId) {
+
+      document.getElementById(
+        "statusTitle"
+      ).innerHTML =
+        "❌ Live Location ID Missing";
+
+      document.getElementById(
+        "statusTitle"
+      ).className =
+        "status-title error";
+
+      document.getElementById(
+        "statusText"
+      ).innerHTML =
+        "This live-location link is incomplete.";
+
+      throw new Error(
+        "locationId missing"
+      );
+    }
+
+
+    // ==========================================================
+    // MAP VARIABLES
+    // ==========================================================
+
+    let map = null;
+
+    let currentMarker = null;
+
+    let startMarker = null;
+
+    let destinationMarker = null;
+
+    let plannedLine = null;
+
+    let travelledLine = null;
+
+    let firstMapLoad = true;
+
+
+    // ==========================================================
+    // CREATE MAP
+    // ==========================================================
+
+    function createMap(
+      latitude,
+      longitude
+    ) {
+
+      if (map) {
+        return;
+      }
+
+
+      map =
+        L.map(
+          "map"
+        ).setView(
+          [
+            latitude,
+            longitude
+          ],
+          13
+        );
+
+
+      // ========================================================
+      // OPENSTREETMAP
+      // ========================================================
+
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom: 19,
+
+          attribution:
+            "&copy; OpenStreetMap contributors"
+        }
+      ).addTo(
+        map
+      );
+
+
+      // ========================================================
+      // LEGEND
+      // ========================================================
+
+      const legend =
+        L.control({
+          position:
+            "bottomright"
+        });
+
+
+      legend.onAdd =
+        function () {
+
+          const div =
+            L.DomUtil.create(
+              "div",
+              "legend"
+            );
+
+
+          div.innerHTML =
+            `
+              <div class="legend-title">
+                Journey Map
+              </div>
+
+              🔵 Planned Route<br>
+
+              🟣 Travelled Route<br>
+
+              🟢 Current Location<br>
+
+              🏁 Final Destination
+            `;
+
+
+          return div;
+        };
+
+
+      legend.addTo(
+        map
+      );
+    }
+
+
+    // ==========================================================
+    // CURRENT LOCATION
+    // ==========================================================
+
+    function updateCurrentMarker(
+      latitude,
+      longitude
+    ) {
+
+      if (!map) {
+        return;
+      }
+
+
+      if (!currentMarker) {
+
+        currentMarker =
+          L.circleMarker(
+            [
+              latitude,
+              longitude
+            ],
+            {
+              radius: 10,
+
+              color: "#1565c0",
+
+              fillColor: "#43a047",
+
+              fillOpacity: 1,
+
+              weight: 3
+            }
+          )
+          .addTo(
+            map
+          )
+          .bindPopup(
+            "🟢 Current Location"
+          );
+
+      } else {
+
+        // IMPORTANT:
+        // Only move the current marker.
+        // Do NOT recreate the map.
+
+        currentMarker.setLatLng(
+          [
+            latitude,
+            longitude
+          ]
+        );
+      }
+    }
+
+
+    // ==========================================================
+    // START LOCATION
+    // ==========================================================
+
+    function updateStartMarker(
+      startLocation
+    ) {
+
+      if (
+        !startLocation
+      ) {
+        return;
+      }
+
+
+      const latitude =
+        Number(
+          startLocation.latitude
+        );
+
+      const longitude =
+        Number(
+          startLocation.longitude
+        );
+
+
+      if (
+        !Number.isFinite(
+          latitude
+        ) ||
+        !Number.isFinite(
+          longitude
+        )
+      ) {
+        return;
+      }
+
+
+      if (!startMarker) {
+
+        startMarker =
+          L.circleMarker(
+            [
+              latitude,
+              longitude
+            ],
+            {
+              radius: 8,
+
+              color: "#1b5e20",
+
+              fillColor: "#66bb6a",
+
+              fillOpacity: 1,
+
+              weight: 2
+            }
+          )
+          .addTo(
+            map
+          )
+          .bindPopup(
+            "🟢 Journey Start"
+          );
+
+      } else {
+
+        startMarker.setLatLng(
+          [
+            latitude,
+            longitude
+          ]
+        );
+      }
+    }
+
+
+    // ==========================================================
+    // FINAL DESTINATION
+    // ==========================================================
+
+    function updateDestinationMarker(
+      destinationLocation
+    ) {
+
+      if (
+        !destinationLocation
+      ) {
+        return;
+      }
+
+
+      const latitude =
+        Number(
+          destinationLocation.latitude
+        );
+
+      const longitude =
+        Number(
+          destinationLocation.longitude
+        );
+
+
+      if (
+        !Number.isFinite(
+          latitude
+        ) ||
+        !Number.isFinite(
+          longitude
+        )
+      ) {
+        return;
+      }
+
+
+      // ========================================================
+      // DESTINATION NEVER FOLLOWS CURRENT LOCATION
+      // ========================================================
+
+      if (
+        !destinationMarker
+      ) {
+
+        destinationMarker =
+          L.marker(
+            [
+              latitude,
+              longitude
+            ],
+            {
+              icon:
+                L.divIcon({
+
+                  className:
+                    "destination-icon",
+
+                  html:
+                    '<div style="font-size:30px;line-height:30px;">🏁</div>',
+
+                  iconSize:
+                    [
+                      32,
+                      32
+                    ],
+
+                  iconAnchor:
+                    [
+                      16,
+                      16
+                    ]
+
+                })
+            }
+          )
+          .addTo(
+            map
+          )
+          .bindPopup(
+            "🏁 Final Destination"
+          );
+
+      } else {
+
+        destinationMarker.setLatLng(
+          [
+            latitude,
+            longitude
+          ]
+        );
+      }
+    }
+
+
+    // ==========================================================
+    // PLANNED ROUTE
+    // ==========================================================
+
+    function updatePlannedRoute(
+      plannedRoute
+    ) {
+
+      if (
+        !Array.isArray(
+          plannedRoute
+        )
+      ) {
+        return;
+      }
+
+
+      if (
+        plannedRoute.length < 2
+      ) {
+        return;
+      }
+
+
+      const coordinates =
+        plannedRoute
+          .filter(
+            function (point) {
+
+              return (
+                Array.isArray(
+                  point
+                ) &&
+                point.length >= 2
+              );
+
+            }
+          )
+          .map(
+            function (point) {
+
+              // Backend route:
+              // [longitude, latitude]
+
+              return [
+                Number(
+                  point[1]
+                ),
+
+                Number(
+                  point[0]
+                )
+              ];
+
+            }
+          );
+
+
+      if (
+        coordinates.length < 2
+      ) {
+        return;
+      }
+
+
+      if (!plannedLine) {
+
+        plannedLine =
+          L.polyline(
+            coordinates,
+            {
+              color: "#1976d2",
+
+              weight: 5,
+
+              opacity: 0.85
+            }
+          )
+          .addTo(
+            map
+          );
+
+      } else {
+
+        plannedLine.setLatLngs(
+          coordinates
+        );
+      }
+    }
+
+
+    // ==========================================================
+    // TRAVELLED ROUTE
+    // ==========================================================
+
+    function updateTravelledRoute(
+      travelledRoute
+    ) {
+
+      if (
+        !Array.isArray(
+          travelledRoute
+        )
+      ) {
+        return;
+      }
+
+
+      if (
+        travelledRoute.length === 0
+      ) {
+        return;
+      }
+
+
+      const coordinates =
+        travelledRoute
+          .filter(
+            function (point) {
+
+              return (
+                point &&
+                Number.isFinite(
+                  Number(
+                    point.latitude
+                  )
+                ) &&
+                Number.isFinite(
+                  Number(
+                    point.longitude
+                  )
+                )
+              );
+
+            }
+          )
+          .map(
+            function (point) {
+
+              return [
+                Number(
+                  point.latitude
+                ),
+
+                Number(
+                  point.longitude
+                )
+              ];
+
+            }
+          );
+
+
+      if (
+        coordinates.length === 0
+      ) {
+        return;
+      }
+
+
+      if (!travelledLine) {
+
+        travelledLine =
+          L.polyline(
+            coordinates,
+            {
+              color: "#9c27b0",
+
+              weight: 6,
+
+              opacity: 0.9
+            }
+          )
+          .addTo(
+            map
+          );
+
+      } else {
+
+        travelledLine.setLatLngs(
+          coordinates
+        );
+      }
+    }
+
+
+    // ==========================================================
+    // CHECK DESTINATION REACHED
+    // ==========================================================
+
+    function checkDestinationReached(
+      currentLatitude,
+      currentLongitude,
+      destinationLocation
+    ) {
+
+      if (
+        !destinationLocation
+      ) {
+        return false;
+      }
+
+
+      const destinationLatitude =
+        Number(
+          destinationLocation.latitude
+        );
+
+      const destinationLongitude =
+        Number(
+          destinationLocation.longitude
+        );
+
+
+      if (
+        !Number.isFinite(
+          destinationLatitude
+        ) ||
+        !Number.isFinite(
+          destinationLongitude
+        )
+      ) {
+        return false;
+      }
+
+
+      // Haversine calculation
+
+      const earthRadius =
+        6371000;
+
+
+      const toRadians =
+        function (degrees) {
+          return (
+            degrees *
+            Math.PI /
+            180
+          );
+        };
+
+
+      const dLat =
+        toRadians(
+          destinationLatitude -
+          currentLatitude
+        );
+
+
+      const dLng =
+        toRadians(
+          destinationLongitude -
+          currentLongitude
+        );
+
+
+      const lat1 =
+        toRadians(
+          currentLatitude
+        );
+
+      const lat2 =
+        toRadians(
+          destinationLatitude
+        );
+
+
+      const a =
+        Math.sin(
+          dLat / 2
+        ) *
+        Math.sin(
+          dLat / 2
+        ) +
+
+        Math.cos(
+          lat1
+        ) *
+        Math.cos(
+          lat2
+        ) *
+
+        Math.sin(
+          dLng / 2
+        ) *
+        Math.sin(
+          dLng / 2
+        );
+
+
+      const c =
+        2 *
+        Math.atan2(
+          Math.sqrt(a),
+          Math.sqrt(
+            1 - a
+          )
+        );
+
+
+      const distance =
+        earthRadius *
+        c;
+
+
+      // Consider destination reached
+      // when within 100 meters.
+
+      return distance <= 100;
+    }
+
+
+    // ==========================================================
+    // UPDATE MAP
+    // ==========================================================
+
+    function updateMap(
+      data
+    ) {
+
+      if (
+        !data ||
+        !data.success
+      ) {
+        return;
+      }
+
+
+      const latitude =
+        Number(
+          data.latitude
+        );
+
+
+      const longitude =
+        Number(
+          data.longitude
+        );
+
+
+      if (
+        !Number.isFinite(
+          latitude
+        ) ||
+        !Number.isFinite(
+          longitude
+        )
+      ) {
+
+        return;
+      }
+
+
+      // ========================================================
+      // CREATE MAP ONLY ONCE
+      // ========================================================
+
+      createMap(
+        latitude,
+        longitude
+      );
+
+
+      // ========================================================
+      // CURRENT LOCATION
+      // ========================================================
+
+      updateCurrentMarker(
+        latitude,
+        longitude
+      );
+
+
+      // ========================================================
+      // START LOCATION
+      // ========================================================
+
+      updateStartMarker(
+        data.startLocation
+      );
+
+
+      // ========================================================
+      // FINAL DESTINATION
+      // ========================================================
+
+      updateDestinationMarker(
+        data.destinationLocation
+      );
+
+
+      // ========================================================
+      // PLANNED ROUTE
+      // ========================================================
+
+      updatePlannedRoute(
+        data.plannedRoute
+      );
+
+
+      // ========================================================
+      // TRAVELLED ROUTE
+      // ========================================================
+
+      updateTravelledRoute(
+        data.travelledRoute
+      );
+
+
+      // ========================================================
+      // DISPLAY COORDINATES
+      // ========================================================
+
+      document.getElementById(
+        "latitudeValue"
+      ).innerHTML =
+        latitude.toFixed(
+          6
+        );
+
+
+      document.getElementById(
+        "longitudeValue"
+      ).innerHTML =
+        longitude.toFixed(
+          6
+        );
+
+
+      // ========================================================
+      // DESTINATION NAME
+      // ========================================================
+
+      if (
+        data.destination
+      ) {
+
+        document.getElementById(
+          "destinationText"
+        ).innerHTML =
+          "🏁 Destination: " +
+          data.destination;
+
+      } else {
+
+        document.getElementById(
+          "destinationText"
+        ).innerHTML =
+          "🏁 Final Destination";
+      }
+
+
+      // ========================================================
+      // ROUTE DEVIATION
+      // ========================================================
+
+      const deviation =
+        data.routeDeviation;
+
+
+      if (
+        deviation &&
+        deviation.active
+      ) {
+
+        document.getElementById(
+          "statusTitle"
+        ).innerHTML =
+          "⚠️ Route Deviation Detected";
+
+
+        document.getElementById(
+          "statusTitle"
+        ).className =
+          "status-title warning";
+
+
+        document.getElementById(
+          "statusText"
+        ).innerHTML =
+          "The user has moved away from the planned route.";
+
+
+        document.getElementById(
+          "routeValue"
+        ).innerHTML =
+          "DEVIATED";
+
+
+        document.getElementById(
+          "routeValue"
+        ).style.color =
+          "#ef6c00";
+
+      } else {
+
+        document.getElementById(
+          "statusTitle"
+        ).innerHTML =
+          "✅ Travelling on Planned Route";
+
+
+        document.getElementById(
+          "statusTitle"
+        ).className =
+          "status-title safe";
+
+
+        document.getElementById(
+          "statusText"
+        ).innerHTML =
+          "Live journey monitoring is active.";
+
+
+        document.getElementById(
+          "routeValue"
+        ).innerHTML =
+          "ON ROUTE";
+
+
+        document.getElementById(
+          "routeValue"
+        ).style.color =
+          "#2e7d32";
+      }
+
+
+      // ========================================================
+      // DESTINATION REACHED
+      // ========================================================
+
+      const reached =
+        checkDestinationReached(
+          latitude,
+          longitude,
+          data.destinationLocation
+        );
+
+
+      if (
+        reached
+      ) {
+
+        document.getElementById(
+          "statusTitle"
+        ).innerHTML =
+          "🏁 Destination Reached";
+
+
+        document.getElementById(
+          "statusTitle"
+        ).className =
+          "status-title safe";
+
+
+        document.getElementById(
+          "statusText"
+        ).innerHTML =
+          "The user has reached the selected final destination.";
+
+
+        document.getElementById(
+          "routeValue"
+        ).innerHTML =
+          "REACHED";
+
+
+        document.getElementById(
+          "routeValue"
+        ).style.color =
+          "#2e7d32";
+      }
+
+
+      // ========================================================
+      // FIRST MAP LOAD
+      // ========================================================
+
+      if (
+        firstMapLoad
+      ) {
+
+        const points = [];
+
+
+        // ------------------------------------------------------
+        // PLANNED ROUTE
+        // ------------------------------------------------------
+
+        if (
+          Array.isArray(
+            data.plannedRoute
+          )
+        ) {
+
+          data.plannedRoute.forEach(
+            function (point) {
+
+              if (
+                Array.isArray(
+                  point
+                ) &&
+                point.length >= 2
+              ) {
+
+                points.push(
+                  [
+                    Number(
+                      point[1]
+                    ),
+
+                    Number(
+                      point[0]
+                    )
+                  ]
+                );
+              }
+            }
+          );
+        }
+
+
+        // ------------------------------------------------------
+        // TRAVELLED ROUTE
+        // ------------------------------------------------------
+
+        if (
+          Array.isArray(
+            data.travelledRoute
+          )
+        ) {
+
+          data.travelledRoute.forEach(
+            function (point) {
+
+              if (
+                point &&
+                Number.isFinite(
+                  Number(
+                    point.latitude
+                  )
+                ) &&
+                Number.isFinite(
+                  Number(
+                    point.longitude
+                  )
+                )
+              ) {
+
+                points.push(
+                  [
+                    Number(
+                      point.latitude
+                    ),
+
+                    Number(
+                      point.longitude
+                    )
+                  ]
+                );
+              }
+            }
+          );
+        }
+
+
+        // ------------------------------------------------------
+        // DESTINATION
+        // ------------------------------------------------------
+
+        if (
+          data.destinationLocation
+        ) {
+
+          const destinationLatitude =
+            Number(
+              data.destinationLocation.latitude
+            );
+
+          const destinationLongitude =
+            Number(
+              data.destinationLocation.longitude
+            );
+
+
+          if (
+            Number.isFinite(
+              destinationLatitude
+            ) &&
+            Number.isFinite(
+              destinationLongitude
+            )
+          ) {
+
+            points.push(
+              [
+                destinationLatitude,
+                destinationLongitude
+              ]
+            );
+          }
+        }
+
+
+        // ------------------------------------------------------
+        // CURRENT LOCATION
+        // ------------------------------------------------------
+
+        points.push(
+          [
+            latitude,
+            longitude
+          ]
+        );
+
+
+        // ------------------------------------------------------
+        // FIT MAP ONLY ON FIRST LOAD
+        // ------------------------------------------------------
+
+        if (
+          points.length > 0
+        ) {
+
+          map.fitBounds(
+            points,
+            {
+              padding:
+                [
+                  35,
+                  35
+                ]
+            }
+          );
+        }
+
+
+        firstMapLoad =
+          false;
+      }
+
+    }
+
+
+    // ==========================================================
+    // LOAD LIVE LOCATION FROM YOUR EXISTING API
+    // ==========================================================
+
+    async function loadLiveLocation() {
+
+      try {
+
+        const apiUrl =
+          NGROK_BASE_URL.replace(
+            /\/$/,
+            ""
+          ) +
+
+          "/api/live-location/" +
+
+          encodeURIComponent(
+            locationId
+          );
+
+
+        console.log(
+          "LIVE LOCATION API:",
+          apiUrl
+        );
+
+
+        // ======================================================
+        // IMPORTANT
+        // This header tells ngrok to skip its browser warning.
+        // ======================================================
+
+        const response =
+          await fetch(
+            apiUrl,
+            {
+              method:
+                "GET",
+
+              cache:
+                "no-store",
+
+              headers:
+                {
+                  "Accept":
+                    "application/json",
+
+                  "ngrok-skip-browser-warning":
+                    "true"
+                }
+            }
+          );
+
+
+        if (
+          !response.ok
+        ) {
+
+          throw new Error(
+            "HTTP " +
+            response.status
+          );
+        }
+
+
+        const data =
+          await response.json();
+
+
+        console.log(
+          "LIVE LOCATION DATA:",
+          data
+        );
+
+
+        updateMap(
+          data
+        );
+
+
+      } catch (
+        error
+      ) {
+
+        console.error(
+          "LIVE LOCATION ERROR:",
+          error
+        );
+
+
+        document.getElementById(
+          "statusTitle"
+        ).innerHTML =
+          "❌ Unable to Load Live Location";
+
+
+        document.getElementById(
+          "statusTitle"
+        ).className =
+          "status-title error";
+
+
+        document.getElementById(
+          "statusText"
+        ).innerHTML =
+          error.message;
+
+
+        document.getElementById(
+          "routeValue"
+        ).innerHTML =
+          "ERROR";
+
+
+        document.getElementById(
+          "routeValue"
+        ).style.color =
+          "#c62828";
+      }
+
+    }
+
+
+    // ==========================================================
+    // FIRST LOAD
+    // ==========================================================
+
+    loadLiveLocation();
+
+
+    // ==========================================================
+    // LIVE REFRESH
+    // ==========================================================
+    //
+    // Your ngrok log already shows requests every ~5 seconds.
+    // We keep the same behavior.
+    //
+    // ==========================================================
+
+    setInterval(
+      loadLiveLocation,
+      5000
+    );
+
+
+  </script>
+
+</body>
+</html>
